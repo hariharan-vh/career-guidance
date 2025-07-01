@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Career Guidance App</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom styles for the app */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom right, #e0f2fe, #e0e7ff); /* Light blue to light indigo gradient */
+            background: linear-gradient(to bottom right, #e0f2fe, #e0e7ff); 
         }
         .container-wrapper {
             min-height: 100vh;
@@ -21,14 +19,13 @@
         }
         .app-container {
             background-color: #ffffff;
-            border-radius: 1rem; /* Rounded corners */
-            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+            border-radius: 1rem; 
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
             padding: 2rem;
             width: 100%;
-            max-width: 48rem; /* Max width for content */
-            margin: 0 auto; /* Center content */
+            max-width: 48rem; 
+            margin: 0 auto; 
         }
-        /* Style for modals */
         .modal {
             position: fixed;
             top: 0;
@@ -59,12 +56,9 @@
                 Career Guidance
             </h1>
             <div id="content-area">
-                <!-- Content will be rendered here by JavaScript -->
             </div>
         </div>
     </div>
-
-    <!-- Message Modal Structure -->
     <div id="message-modal" class="modal hidden">
         <div class="modal-content space-y-4">
             <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3>
@@ -82,8 +76,6 @@
         const modalTitle = document.getElementById('modal-title');
         const modalMessage = document.getElementById('modal-message');
         const modalCloseButton = document.getElementById('modal-close-button');
-
-        // --- Data Definitions (Simulated Backend) ---
         const colleges = [
             {
                 id: 'c1',
@@ -195,23 +187,20 @@
         let score = 0;
         let testCompleted = false;
 
-        // --- Utility Functions ---
-
-        // Function to show a custom message modal instead of alert()
         function showMessage(title, message) {
             modalTitle.textContent = title;
             modalMessage.textContent = message;
             messageModal.classList.remove('hidden');
         }
 
-        // Close button for the modal
+     
         modalCloseButton.addEventListener('click', () => {
             messageModal.classList.add('hidden');
         });
 
-        // Function to render different pages
+    
         function renderPage(pageName) {
-            contentArea.innerHTML = ''; // Clear current content
+            contentArea.innerHTML = '';
             switch (pageName) {
                 case 'login':
                     renderLoginPage();
@@ -223,7 +212,6 @@
                     renderCollegeListPage();
                     break;
                 case 'collegeDetails':
-                    // This will be called with a college ID
                     break;
                 case 'aptitudeTest':
                     renderAptitudeTestPage();
@@ -232,12 +220,9 @@
                     renderTestResultsPage();
                     break;
                 default:
-                    renderLoginPage(); // Default to login
+                    renderLoginPage(); 
             }
         }
-
-        // --- Page Rendering Functions ---
-
         function renderLoginPage() {
             contentArea.innerHTML = `
                 <div class="space-y-6">
@@ -265,7 +250,6 @@
             `;
             document.getElementById('login-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                // Simulate login success
                 showMessage('Login Successful!', 'Welcome to the Career Guidance App.');
                 renderPage('dashboard');
             });
@@ -299,7 +283,6 @@
             `;
             document.getElementById('signup-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                // Simulate signup success
                 showMessage('Sign Up Successful!', 'You can now log in.');
                 renderPage('login');
             });
@@ -355,7 +338,6 @@
             `;
             document.getElementById('view-colleges-btn').addEventListener('click', () => renderPage('collegeList'));
             document.getElementById('take-aptitude-test-btn').addEventListener('click', () => {
-                // Reset test state before starting
                 currentQuestionIndex = 0;
                 selectedAnswers = {};
                 score = 0;
@@ -367,9 +349,7 @@
         }
 
         function renderCollegeListPage(filters = {}) {
-            let filteredColleges = [...colleges]; // Create a mutable copy
-
-            // Apply filters
+            let filteredColleges = [...colleges]; 
             if (filters.location) {
                 if (filters.location === 'India') {
                     filteredColleges = filteredColleges.filter(c => c.location.toLowerCase().includes('india'));
@@ -381,14 +361,11 @@
                 filteredColleges = filteredColleges.filter(c => c.ranking >= parseInt(filters.minRanking));
             }
             if (filters.maxFees) {
-                // Simple numerical comparison for fees (assuming they are numbers or can be parsed)
                 filteredColleges = filteredColleges.filter(c => {
                     const collegeFeeNum = parseFloat(c.fees.replace(/[^\d.]/g, ''));
                     return collegeFeeNum <= parseFloat(filters.maxFees);
                 });
             }
-
-            // Always sort by ranking
             filteredColleges.sort((a, b) => a.ranking - b.ranking);
 
             contentArea.innerHTML = `
@@ -450,7 +427,6 @@
             `;
             document.getElementById('back-to-dashboard-btn').addEventListener('click', () => renderPage('dashboard'));
 
-            // Filter event listeners
             document.getElementById('min-ranking').addEventListener('input', (e) => {
                 renderCollegeListPage({
                     location: filters.location,
@@ -480,10 +456,10 @@
                 });
             });
             document.getElementById('clear-filters-btn').addEventListener('click', () => {
-                renderCollegeListPage({}); // Clear all filters
+                renderCollegeListPage({}); 
             });
 
-            // View Details button listeners
+        
             document.querySelectorAll('.select-college-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const collegeId = e.target.dataset.collegeId;
@@ -538,14 +514,14 @@
 
         function renderAptitudeTestPage() {
             if (testCompleted) {
-                renderTestResultsPage(); // If test is completed, show results immediately
+                renderTestResultsPage(); 
                 return;
             }
 
             const currentQuestion = aptitudeQuestions[currentQuestionIndex];
 
             if (!currentQuestion) {
-                 // This case should ideally not happen if logic is correct
+         
                 showMessage('Error', 'No more questions or test data issue.');
                 renderPage('dashboard');
                 return;
@@ -583,7 +559,7 @@
             const optionsContainer = document.getElementById('options-container');
             const nextQuestionBtn = document.getElementById('next-question-btn');
 
-            // Render options
+           
             currentQuestion.options.forEach((option, index) => {
                 const label = document.createElement('label');
                 label.className = `flex items-center p-3 border rounded-md cursor-pointer transition duration-200 ${selectedAnswers[currentQuestion.id] === option ? 'bg-indigo-100 border-indigo-500' : 'bg-white border-gray-300 hover:bg-gray-50'}`;
@@ -594,8 +570,7 @@
                 label.querySelector('input').addEventListener('change', (e) => {
                     selectedAnswers[currentQuestion.id] = e.target.value;
                     nextQuestionBtn.disabled = false; // Enable button once an option is selected
-                    // Re-render options to update styling if needed, or just update class on current one
-                    // For simplicity, we just enable the button. A more complex app might re-render the current question.
+                 
                     updateOptionStyles(optionsContainer, currentQuestion.id, e.target.value);
                 });
                 optionsContainer.appendChild(label);
@@ -614,15 +589,14 @@
 
                 if (currentQuestionIndex < aptitudeQuestions.length - 1) {
                     currentQuestionIndex++;
-                    renderAptitudeTestPage(); // Move to next question
+                    renderAptitudeTestPage(); 
                 } else {
                     calculateScoreAndFinishTest();
-                    renderPage('testResults'); // Go to results page
+                    renderPage('testResults');
                 }
             });
         }
 
-        // Helper to update radio button styles without full re-render
         function updateOptionStyles(container, questionId, selectedValue) {
             container.querySelectorAll(`input[name="${questionId}"]`).forEach(input => {
                 const label = input.closest('label');
@@ -671,10 +645,8 @@
             document.getElementById('back-to-dashboard-from-results-btn').addEventListener('click', () => renderPage('dashboard'));
         }
 
-
-        // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', () => {
-            renderPage('login'); // Start with the login page
+            renderPage('login'); 
         });
     </script>
 </body>
