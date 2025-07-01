@@ -1,0 +1,111 @@
+## 🎓 Career Guidance Web Application
+A modern web-based Career Guidance system to help students explore and plan their future careers. The app provides personalized suggestions, information on career pathways, and a platform for students to interact with mentors or counselors.
+
+## 📌 Objectives
+To help students make informed career decisions
+To provide a centralized and accessible platform for career counseling
+To connect students with mentors or guidance counselors
+To store and manage students’ career preferences securely
+To demonstrate a modern, scalable, web-based guidance solution.
+
+## ✨ Features
+Student registration and login
+Browse career options by domain/interest
+Get personalized suggestions
+Chat with mentors or counselors
+Responsive user interface (desktop & mobile)
+Admin panel to manage careers, counselors, and students
+Real-time database using Firebase (or your backend of choice).
+
+## 🛠️ Tech Stack
+Frontend: HTML, CSS, JavaScript
+Backend/Database: Firebase (Firestore, Authentication)
+Hosting: Firebase Hosting or GitHub Pages
+Other: JavaScript logging, modular code, maintainable and testable.
+
+## How to Use the Career Guidance App (Client-Side HTML/CSS/JS Version)
+When you open the GitHub Pages URL for your app, you will typically start on the Login Page.
+
+1. Login/Sign Up (Simulated)
+Purpose: This page simulates user authentication to control access to the main features.
+
+How to Use:
+
+For Login: Enter any email address and any password into the fields. For example, you can type test@example.com and password123. Click the "Login" button.
+
+For Sign Up: Click the "Sign Up" button at the bottom. On the signup page, enter any new email and password. Click "Sign Up." It will then prompt you to log in with those (simulated) credentials.
+
+Important Note: Since there's no backend (like Firebase) in this version, these logins/signups are not real. No data is saved, and any credentials you enter will "work."
+
+2. Dashboard
+Purpose: This is the main hub after you "log in." It provides quick access to the core functionalities.
+
+How to Use:
+
+You'll see a welcome message.
+
+"View College List" button: Click this to navigate to the page where you can explore various colleges.
+
+"Take Aptitude Test" button: Click this to start the aptitude test.
+
+"Recommended Colleges (Sample)" section: This displays a few hardcoded colleges. You can click the "View All Colleges" button below this section to go to the full college list.
+
+"Logout" button: Click this to return to the simulated Login Page.
+
+3. College List Page
+Purpose: To browse and filter a list of simulated colleges.
+
+How to Use:
+
+Back to Dashboard: Click the "Back to Dashboard" button at the top to return.
+
+Filter Section:
+
+Minimum Ranking: Type a number (e.g., 10) to only show colleges with a ranking equal to or better than that number.
+
+Maximum Fees: Type a number (e.g., 50000) to only show colleges with fees less than or equal to that amount (it attempts to parse numbers from the fee strings).
+
+"Filter by India" / "Filter by Abroad" buttons: Click these to narrow down colleges by location.
+
+"Clear Filters" button: Click this to remove all applied filters and see the complete list again.
+
+College Cards: Each card displays basic information about a college.
+
+"View Details & Register" button: Click this on any college card to view more in-depth information about that specific college.
+
+4. College Details Page
+Purpose: To show comprehensive information about a selected college.
+
+How to Use:
+
+Back to College List: Click the "Back to College List" button to return to the previous page.
+
+Detailed Information: You'll see expanded details including housing facilities, campus support services, and rules & regulations.
+
+"Simulate Registration" button: Click this to get a pop-up message (our custom modal) indicating that a registration process would start here in a real application.
+
+5. Aptitude Test Page
+Purpose: To take a simulated multiple-choice aptitude test.
+
+How to Use:
+
+Back to Dashboard: Click the "Back to Dashboard" button at the top.
+
+Questions: Questions will appear one at a time.
+
+Select an Answer: Click on one of the radio buttons next to an option to select your answer.
+
+"Next Question" / "Finish Test" button: Once you select an answer, this button will become active. Click it to move to the next question. On the last question, it will change to "Finish Test."
+
+Test Completion: After you click "Finish Test," it will calculate your score and show you the "Test Completed!" page.
+
+6. Test Results Page
+Purpose: To display your score and allow you to review your answers.
+
+How to Use:
+
+You'll see your score out of the total questions.
+
+Review Answers: Scroll down to see each question, your selected answer, and the correct answer. Incorrect answers will be highlighted.
+
+Back to Dashboard: Click this button to return to the main dashboard.
