@@ -23,7 +23,7 @@ Backend/Database: Firebase (Firestore, Authentication)
 Hosting: Firebase Hosting or GitHub Pages
 Other: JavaScript logging, modular code, maintainable and testable.
 
-## How to Use the Career Guidance App (Client-Side HTML/CSS/JS Version)
+## 📌How to Use the Career Guidance App (Client-Side HTML/CSS/JS Version)
 When you open the GitHub Pages URL for your app, you will typically start on the Login Page.
 
 1. Login/Sign Up (Simulated)
