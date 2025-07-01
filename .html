@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Guidance App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the app */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #e0f2fe, #e0e7ff); /* Light blue to light indigo gradient */
+        }
+        .container-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+            padding: 2rem;
+            width: 100%;
+            max-width: 48rem; /* Max width for content */
+            margin: 0 auto; /* Center content */
+        }
+        /* Style for modals */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.2), 0 4px 10px -2px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 28rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-root" class="container-wrapper">
+        <div class="app-container space-y-8">
+            <h1 class="text-4xl font-extrabold text-center text-indigo-700 mb-8 tracking-tight">
+                Career Guidance
+            </h1>
+            <div id="content-area">
+                <!-- Content will be rendered here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Modal Structure -->
+    <div id="message-modal" class="modal hidden">
+        <div class="modal-content space-y-4">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3>
+            <p id="modal-message" class="text-gray-700"></p>
+            <button id="modal-close-button" class="mt-4 bg-indigo-600 text-white p-3 rounded-md font-semibold hover:bg-indigo-700 transition duration-300 shadow-md">
+                Close
+            </button>
+        </div>
+    </div>
+
+
+    <script>
+        const contentArea = document.getElementById('content-area');
+        const messageModal = document.getElementById('message-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseButton = document.getElementById('modal-close-button');
+
+        // --- Data Definitions (Simulated Backend) ---
+        const colleges = [
+            {
+                id: 'c1',
+                name: "Indian Institute of Technology Bombay",
+                location: "Mumbai, India",
+                fees: "₹2,00,000/year",
+                eligibility: "JEE Advanced",
+                placementRate: "90%",
+                scholarships: "Merit-based",
+                ranking: 1,
+                housing: "On-campus hostels available",
+                support: "Counseling services, academic support",
+                rules: "Strict attendance, no ragging policy"
+            },
+            {
+                id: 'c2',
+                name: "Massachusetts Institute of Technology",
+                location: "Cambridge, USA",
+                fees: "$60,000/year",
+                eligibility: "SAT/ACT, Essays, Recommendations",
+                placementRate: "95%",
+                scholarships: "Need-based, competitive",
+                ranking: 1,
+                housing: "Guaranteed on-campus housing for freshmen",
+                support: "Career services, health services",
+                rules: "Academic honesty, campus code of conduct"
+            },
+            {
+                id: 'c3',
+                name: "University of Delhi",
+                location: "Delhi, India",
+                fees: "₹50,000/year",
+                eligibility: "CUET",
+                placementRate: "70%",
+                scholarships: "Various state/national schemes",
+                ranking: 20,
+                housing: "Limited hostel facilities, PGs available nearby",
+                support: "Student associations, library access",
+                rules: "University academic regulations"
+            },
+            {
+                id: 'c4',
+                name: "Stanford University",
+                location: "Stanford, USA",
+                fees: "$65,000/year",
+                eligibility: "SAT/ACT, Strong academic record",
+                placementRate: "92%",
+                scholarships: "Extensive financial aid",
+                ranking: 2,
+                housing: "Variety of housing options",
+                support: "Research opportunities, entrepreneurial ecosystem",
+                rules: "Honor code, residential policies"
+            },
+            {
+                id: 'c5',
+                name: "Indian Institute of Management Bangalore",
+                location: "Bangalore, India",
+                fees: "₹23,00,000/course",
+                eligibility: "CAT, Work experience (for some programs)",
+                placementRate: "98%",
+                scholarships: "Industry-sponsored, need-based",
+                ranking: 2,
+                housing: "Well-equipped hostel blocks",
+                support: "Alumni network, mentoring programs",
+                rules: "Professional conduct, academic integrity"
+            }
+        ];
+
+        const aptitudeQuestions = [
+            {
+                id: 'q1',
+                type: 'verbal',
+                question: "Choose the word that is most nearly opposite in meaning to 'Punctilious'.",
+                options: ['Careful', 'Sloppy', 'Precise', 'Diligent'],
+                correctAnswer: 'Sloppy'
+            },
+            {
+                id: 'q2',
+                type: 'quantitative',
+                question: "If a = 5, b = 3, then what is a² + b²?",
+                options: ['8', '16', '34', '64'],
+                correctAnswer: '34'
+            },
+            {
+                id: 'q3',
+                type: 'general-knowledge',
+                question: "Which planet is known as the 'Red Planet'?",
+                options: ['Earth', 'Mars', 'Jupiter', 'Venus'],
+                correctAnswer: 'Mars'
+            },
+            {
+                id: 'q4',
+                type: 'verbal',
+                question: "Complete the analogy: 'Hand is to Glove as Foot is to ____.'",
+                options: ['Sock', 'Shoe', 'Boot', 'Toe'],
+                correctAnswer: 'Shoe'
+            },
+            {
+                id: 'q5',
+                type: 'quantitative',
+                question: "A car travels at 60 km/h. How far does it travel in 30 minutes?",
+                options: ['20 km', '30 km', '40 km', '60 km'],
+                correctAnswer: '30 km'
+            },
+        ];
+
+        let selectedAnswers = {};
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let testCompleted = false;
+
+        // --- Utility Functions ---
+
+        // Function to show a custom message modal instead of alert()
+        function showMessage(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.classList.remove('hidden');
+        }
+
+        // Close button for the modal
+        modalCloseButton.addEventListener('click', () => {
+            messageModal.classList.add('hidden');
+        });
+
+        // Function to render different pages
+        function renderPage(pageName) {
+            contentArea.innerHTML = ''; // Clear current content
+            switch (pageName) {
+                case 'login':
+                    renderLoginPage();
+                    break;
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'collegeList':
+                    renderCollegeListPage();
+                    break;
+                case 'collegeDetails':
+                    // This will be called with a college ID
+                    break;
+                case 'aptitudeTest':
+                    renderAptitudeTestPage();
+                    break;
+                case 'testResults':
+                    renderTestResultsPage();
+                    break;
+                default:
+                    renderLoginPage(); // Default to login
+            }
+        }
+
+        // --- Page Rendering Functions ---
+
+        function renderLoginPage() {
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Student Login (Simulated)</h2>
+                    <form id="login-form" class="space-y-5">
+                        <div>
+                            <label for="email" class="block text-gray-700 text-sm font-medium mb-1">Email</label>
+                            <input type="email" id="email" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="your.email@example.com" required>
+                        </div>
+                        <div>
+                            <label for="password" class="block text-gray-700 text-sm font-medium mb-1">Password</label>
+                            <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+                            Login (Any input works)
+                        </button>
+                    </form>
+                    <p class="text-center text-gray-600">
+                        Don't have an account?
+                        <button id="signup-btn" class="text-indigo-600 hover:underline font-medium">
+                            Sign Up
+                        </button>
+                    </p>
+                </div>
+            `;
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Simulate login success
+                showMessage('Login Successful!', 'Welcome to the Career Guidance App.');
+                renderPage('dashboard');
+            });
+            document.getElementById('signup-btn').addEventListener('click', () => renderSignUpPage());
+        }
+
+        function renderSignUpPage() {
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Student Sign Up (Simulated)</h2>
+                    <form id="signup-form" class="space-y-5">
+                        <div>
+                            <label for="new-email" class="block text-gray-700 text-sm font-medium mb-1">Email</label>
+                            <input type="email" id="new-email" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="your.email@example.com" required>
+                        </div>
+                        <div>
+                            <label for="new-password" class="block text-gray-700 text-sm font-medium mb-1">Password</label>
+                            <input type="password" id="new-password" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="•••••••• (min 6 characters)" required minlength="6">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+                            Sign Up (Any input works)
+                        </button>
+                    </form>
+                    <p class="text-center text-gray-600">
+                        Already have an account?
+                        <button id="login-btn" class="text-indigo-600 hover:underline font-medium">
+                            Login
+                        </button>
+                    </p>
+                </div>
+            `;
+            document.getElementById('signup-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Simulate signup success
+                showMessage('Sign Up Successful!', 'You can now log in.');
+                renderPage('login');
+            });
+            document.getElementById('login-btn').addEventListener('click', () => renderLoginPage());
+        }
+
+        function renderDashboard() {
+            contentArea.innerHTML = `
+                <div class="space-y-8">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Welcome to Your Dashboard!</h2>
+                    <p class="text-center text-gray-600">
+                        Explore institutions and take an aptitude test to guide your career.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <button id="view-colleges-btn" class="bg-indigo-500 text-white p-4 rounded-lg shadow-md hover:bg-indigo-600 transition duration-300 flex items-center justify-center space-x-2 font-semibold text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13.622c0 .248.163.468.404.538l3.05.86c.245.07.498-.01.684-.196L21 15.621V7.75c0-.248-.163-.468-.404-.538l-3.05-.86a.999.999 0 00-.684.196L12 6.253zM12 6.253V21.1c0 .248-.163.468-.404.538l-3.05.86a.999.999 0 01-.684-.196L3 15.621V7.75c0-.248.163-.468.404-.538l3.05-.86a.999.999 0 00.684.196L12 6.253z" />
+                            </svg>
+                            <span>View College List</span>
+                        </button>
+                        <button id="take-aptitude-test-btn" class="bg-green-500 text-white p-4 rounded-lg shadow-md hover:bg-green-600 transition duration-300 flex items-center justify-center space-x-2 font-semibold text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            <span>Take Aptitude Test</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Recommended Colleges (Sample)</h3>
+                        <div class="space-y-4">
+                            ${colleges.slice(0, 3).map(college => `
+                                <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100">
+                                    <h4 class="text-xl font-bold text-indigo-700">${college.name}</h4>
+                                    <p class="text-gray-700">Location: ${college.location}</p>
+                                    <p class="text-gray-700">Fees: ${college.fees}</p>
+                                    <p class="text-gray-700">Ranking: ${college.ranking}</p>
+                                </div>
+                            `).join('')}
+                            <button id="view-all-colleges-dashboard-btn" class="mt-4 w-full bg-blue-500 text-white p-3 rounded-md font-semibold hover:bg-blue-600 transition duration-300 shadow-md">
+                                View All Colleges
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center mt-8">
+                        <button id="logout-btn" class="bg-red-500 text-white p-3 rounded-md font-semibold text-lg hover:bg-red-600 transition duration-300 shadow-md">
+                            Logout (Go to Login Page)
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('view-colleges-btn').addEventListener('click', () => renderPage('collegeList'));
+            document.getElementById('take-aptitude-test-btn').addEventListener('click', () => {
+                // Reset test state before starting
+                currentQuestionIndex = 0;
+                selectedAnswers = {};
+                score = 0;
+                testCompleted = false;
+                renderPage('aptitudeTest');
+            });
+            document.getElementById('view-all-colleges-dashboard-btn').addEventListener('click', () => renderPage('collegeList'));
+            document.getElementById('logout-btn').addEventListener('click', () => renderPage('login'));
+        }
+
+        function renderCollegeListPage(filters = {}) {
+            let filteredColleges = [...colleges]; // Create a mutable copy
+
+            // Apply filters
+            if (filters.location) {
+                if (filters.location === 'India') {
+                    filteredColleges = filteredColleges.filter(c => c.location.toLowerCase().includes('india'));
+                } else if (filters.location === 'Abroad') {
+                    filteredColleges = filteredColleges.filter(c => !c.location.toLowerCase().includes('india'));
+                }
+            }
+            if (filters.minRanking) {
+                filteredColleges = filteredColleges.filter(c => c.ranking >= parseInt(filters.minRanking));
+            }
+            if (filters.maxFees) {
+                // Simple numerical comparison for fees (assuming they are numbers or can be parsed)
+                filteredColleges = filteredColleges.filter(c => {
+                    const collegeFeeNum = parseFloat(c.fees.replace(/[^\d.]/g, ''));
+                    return collegeFeeNum <= parseFloat(filters.maxFees);
+                });
+            }
+
+            // Always sort by ranking
+            filteredColleges.sort((a, b) => a.ranking - b.ranking);
+
+            contentArea.innerHTML = `
+                <div class="space-y-8">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">College List</h2>
+                    <button id="back-to-dashboard-btn" class="bg-gray-200 text-gray-700 p-2 rounded-md font-semibold hover:bg-gray-300 transition duration-300 text-sm flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Back to Dashboard</span>
+                    </button>
+
+                    <!-- Filter Section -->
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-inner space-y-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Filter Colleges</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="min-ranking" class="block text-gray-700 text-sm font-medium mb-1">Minimum Ranking</label>
+                                <input type="number" id="min-ranking" value="${filters.minRanking || ''}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 10">
+                            </div>
+                            <div>
+                                <label for="max-fees" class="block text-gray-700 text-sm font-medium mb-1">Maximum Fees (numeric only)</label>
+                                <input type="number" id="max-fees" value="${filters.maxFees || ''}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 50000">
+                            </div>
+                        </div>
+                        <div class="flex justify-center mt-4 space-x-4">
+                            <button id="location-india-btn" class="bg-indigo-500 text-white p-3 rounded-md font-semibold hover:bg-indigo-600 transition duration-300 shadow-md">
+                                Filter by India
+                            </button>
+                            <button id="location-abroad-btn" class="bg-indigo-500 text-white p-3 rounded-md font-semibold hover:bg-indigo-600 transition duration-300 shadow-md">
+                                Filter by Abroad
+                            </button>
+                            <button id="clear-filters-btn" class="bg-gray-300 text-gray-800 p-3 rounded-md font-semibold hover:bg-gray-400 transition duration-300 shadow-md">
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- College List Display -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${filteredColleges.length > 0 ? filteredColleges.map(college => `
+                            <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-6 space-y-3 hover:shadow-xl transition duration-300">
+                                <h4 class="text-2xl font-bold text-indigo-800">${college.name}</h4>
+                                <p class="text-gray-700"><span class="font-semibold">Location:</span> ${college.location}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Fees:</span> ${college.fees}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Eligibility:</span> ${college.eligibility}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Placement Rate:</span> ${college.placementRate}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Scholarships:</span> ${college.scholarships}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Ranking:</span> ${college.ranking}</p>
+                                <button data-college-id="${college.id}" class="select-college-btn mt-4 w-full bg-green-500 text-white p-3 rounded-md font-semibold hover:bg-green-600 transition duration-300 shadow-md">
+                                    View Details & Register
+                                </button>
+                            </div>
+                        `).join('') : `
+                            <p class="col-span-full text-center text-gray-500">No colleges match your criteria. Try adjusting your filters.</p>
+                        `}
+                    </div>
+                </div>
+            `;
+            document.getElementById('back-to-dashboard-btn').addEventListener('click', () => renderPage('dashboard'));
+
+            // Filter event listeners
+            document.getElementById('min-ranking').addEventListener('input', (e) => {
+                renderCollegeListPage({
+                    location: filters.location,
+                    minRanking: e.target.value,
+                    maxFees: document.getElementById('max-fees').value
+                });
+            });
+            document.getElementById('max-fees').addEventListener('input', (e) => {
+                renderCollegeListPage({
+                    location: filters.location,
+                    minRanking: document.getElementById('min-ranking').value,
+                    maxFees: e.target.value
+                });
+            });
+            document.getElementById('location-india-btn').addEventListener('click', () => {
+                renderCollegeListPage({
+                    location: 'India',
+                    minRanking: document.getElementById('min-ranking').value,
+                    maxFees: document.getElementById('max-fees').value
+                });
+            });
+            document.getElementById('location-abroad-btn').addEventListener('click', () => {
+                renderCollegeListPage({
+                    location: 'Abroad',
+                    minRanking: document.getElementById('min-ranking').value,
+                    maxFees: document.getElementById('max-fees').value
+                });
+            });
+            document.getElementById('clear-filters-btn').addEventListener('click', () => {
+                renderCollegeListPage({}); // Clear all filters
+            });
+
+            // View Details button listeners
+            document.querySelectorAll('.select-college-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const collegeId = e.target.dataset.collegeId;
+                    renderCollegeDetailsPage(collegeId);
+                });
+            });
+        }
+
+        function renderCollegeDetailsPage(collegeId) {
+            const college = colleges.find(c => c.id === collegeId);
+            if (!college) {
+                showMessage('Error', 'College not found.');
+                renderPage('collegeList');
+                return;
+            }
+
+            contentArea.innerHTML = `
+                <div class="space-y-8">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">${college.name}</h2>
+                    <button id="back-to-colleges-btn" class="bg-gray-200 text-gray-700 p-2 rounded-md font-semibold hover:bg-gray-300 transition duration-300 text-sm flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Back to College List</span>
+                    </button>
+
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-inner space-y-4">
+                        <p class="text-gray-800"><span class="font-semibold">Location:</span> ${college.location}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Fees:</span> ${college.fees}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Eligibility:</span> ${college.eligibility}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Placement Rate:</span> ${college.placementRate}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Scholarships:</span> ${college.scholarships}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Ranking:</span> ${college.ranking}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Housing Facilities:</span> ${college.housing}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Campus Support Services:</span> ${college.support}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Rules & Regulations:</span> ${college.rules}</p>
+                    </div>
+
+                    <div class="flex justify-center mt-6">
+                        <button id="register-college-btn" class="bg-purple-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-purple-700 transition duration-300 shadow-md">
+                            Simulate Registration for ${college.name}
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('back-to-colleges-btn').addEventListener('click', () => renderPage('collegeList'));
+            document.getElementById('register-college-btn').addEventListener('click', () => {
+                showMessage('Registration Simulated', `You have expressed interest in ${college.name}. In a real app, this would initiate a detailed registration process.`);
+            });
+        }
+
+
+        function renderAptitudeTestPage() {
+            if (testCompleted) {
+                renderTestResultsPage(); // If test is completed, show results immediately
+                return;
+            }
+
+            const currentQuestion = aptitudeQuestions[currentQuestionIndex];
+
+            if (!currentQuestion) {
+                 // This case should ideally not happen if logic is correct
+                showMessage('Error', 'No more questions or test data issue.');
+                renderPage('dashboard');
+                return;
+            }
+
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Aptitude Test</h2>
+                    <button id="back-to-dashboard-test-btn" class="bg-gray-200 text-gray-700 p-2 rounded-md font-semibold hover:bg-gray-300 transition duration-300 text-sm flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Back to Dashboard</span>
+                    </button>
+
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-lg space-y-4">
+                        <p class="text-lg font-semibold text-gray-900">
+                            Question ${currentQuestionIndex + 1} of ${aptitudeQuestions.length}:
+                        </p>
+                        <p class="text-xl text-gray-800 font-medium">${currentQuestion.question}</p>
+                        <div class="space-y-3" id="options-container">
+                            <!-- Options will be dynamically added here -->
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button id="next-question-btn" class="bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md disabled:opacity-50" disabled>
+                                ${currentQuestionIndex === aptitudeQuestions.length - 1 ? 'Finish Test' : 'Next Question'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('back-to-dashboard-test-btn').addEventListener('click', () => renderPage('dashboard'));
+
+            const optionsContainer = document.getElementById('options-container');
+            const nextQuestionBtn = document.getElementById('next-question-btn');
+
+            // Render options
+            currentQuestion.options.forEach((option, index) => {
+                const label = document.createElement('label');
+                label.className = `flex items-center p-3 border rounded-md cursor-pointer transition duration-200 ${selectedAnswers[currentQuestion.id] === option ? 'bg-indigo-100 border-indigo-500' : 'bg-white border-gray-300 hover:bg-gray-50'}`;
+                label.innerHTML = `
+                    <input type="radio" name="${currentQuestion.id}" value="${option}" class="form-radio h-5 w-5 text-indigo-600" ${selectedAnswers[currentQuestion.id] === option ? 'checked' : ''}>
+                    <span class="ml-3 text-gray-800">${option}</span>
+                `;
+                label.querySelector('input').addEventListener('change', (e) => {
+                    selectedAnswers[currentQuestion.id] = e.target.value;
+                    nextQuestionBtn.disabled = false; // Enable button once an option is selected
+                    // Re-render options to update styling if needed, or just update class on current one
+                    // For simplicity, we just enable the button. A more complex app might re-render the current question.
+                    updateOptionStyles(optionsContainer, currentQuestion.id, e.target.value);
+                });
+                optionsContainer.appendChild(label);
+            });
+
+            // Initial button state based on whether an answer is already selected for this question
+            if (selectedAnswers[currentQuestion.id]) {
+                nextQuestionBtn.disabled = false;
+            }
+
+            nextQuestionBtn.addEventListener('click', () => {
+                if (!selectedAnswers[currentQuestion.id]) {
+                    showMessage('Warning', 'Please select an answer before proceeding.');
+                    return;
+                }
+
+                if (currentQuestionIndex < aptitudeQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    renderAptitudeTestPage(); // Move to next question
+                } else {
+                    calculateScoreAndFinishTest();
+                    renderPage('testResults'); // Go to results page
+                }
+            });
+        }
+
+        // Helper to update radio button styles without full re-render
+        function updateOptionStyles(container, questionId, selectedValue) {
+            container.querySelectorAll(`input[name="${questionId}"]`).forEach(input => {
+                const label = input.closest('label');
+                if (input.value === selectedValue) {
+                    label.classList.add('bg-indigo-100', 'border-indigo-500');
+                    label.classList.remove('bg-white', 'border-gray-300', 'hover:bg-gray-50');
+                } else {
+                    label.classList.remove('bg-indigo-100', 'border-indigo-500');
+                    label.classList.add('bg-white', 'border-gray-300', 'hover:bg-gray-50');
+                }
+            });
+        }
+
+        function calculateScoreAndFinishTest() {
+            score = 0;
+            aptitudeQuestions.forEach(q => {
+                if (selectedAnswers[q.id] === q.correctAnswer) {
+                    score++;
+                }
+            });
+            testCompleted = true;
+        }
+
+        function renderTestResultsPage() {
+            contentArea.innerHTML = `
+                <div class="space-y-6 text-center">
+                    <h2 class="text-3xl font-bold text-green-700">Test Completed!</h2>
+                    <p class="text-xl text-gray-800">Your Score: <span class="font-extrabold text-indigo-600">${score}</span> out of <span class="font-extrabold text-indigo-600">${aptitudeQuestions.length}</span></p>
+                    <div class="bg-green-50 p-6 rounded-lg shadow-inner">
+                        <h3 class="text-2xl font-semibold text-gray-700 mb-4">Review Your Answers</h3>
+                        <div class="space-y-4 max-h-96 overflow-y-auto border border-gray-200 p-2 rounded-md">
+                            ${aptitudeQuestions.map((q, index) => `
+                                <div class="p-3 border border-gray-200 rounded-md bg-white text-left">
+                                    <p class="font-semibold text-gray-900 mb-1">Q${index + 1}: ${q.question}</p>
+                                    <p class="text-sm text-gray-700">Your Answer: <span class="${selectedAnswers[q.id] === q.correctAnswer ? 'text-green-600' : 'text-red-600'} font-medium">${selectedAnswers[q.id] || 'Not answered'}</span></p>
+                                    <p class="text-sm text-gray-700">Correct Answer: <span class="font-medium text-green-600">${q.correctAnswer}</span></p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button id="back-to-dashboard-from-results-btn" class="bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+                        Back to Dashboard
+                    </button>
+                </div>
+            `;
+            document.getElementById('back-to-dashboard-from-results-btn').addEventListener('click', () => renderPage('dashboard'));
+        }
+
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPage('login'); // Start with the login page
+        });
+    </script>
+</body>
+</html>
