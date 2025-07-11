@@ -3,440 +3,651 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unified Mentor - Career Guidance</title>
+    <title>Career Guidance App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #e0f2fe, #e0e7ff); 
+        }
+        .container-wrapper {
             min-height: 100vh;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo-container {
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
         }
-
-        .logo-container img {
-            height: 60px; /* Adjust as needed */
-            margin-right: 10px;
+        .app-container {
+            background-color: #ffffff;
+            border-radius: 1rem; 
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            width: 100%;
+            max-width: 48rem; 
+            margin: 0 auto; 
         }
-
-        h1 {
-            color: #333;
-        }
-
-        p {
-            color: #666;
-        }
-
-        main {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        .auth-form {
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
             display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .auth-form input[type="email"],
-        .auth-form input[type="password"],
-        .auth-form input[type="text"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .auth-form button,
-        #location-selection button,
-        #logout-btn {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .auth-form button:hover,
-        #location-selection button:hover,
-        #logout-btn:hover {
-            background-color: #0056b3;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #location-selection {
-            display: flex;
+            align-items: center;
             justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
+            z-index: 1000;
         }
-
-        #college-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        #college-list li {
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 4px;
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.2), 0 4px 10px -2px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 28rem;
+            text-align: center;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <header>
-        <div class="logo-container">
-            <img src="logo.png" alt="Unified Mentor Logo">
-            [cite_start]<h1>UNIFIED MENTOR</h1> [cite: 1]
+    <div id="app-root" class="container-wrapper">
+        <div class="app-container space-y-8">
+            <h1 class="text-4xl font-extrabold text-center text-indigo-700 mb-8 tracking-tight">
+                Career Guidance
+            </h1>
+            <div id="content-area">
+            </div>
         </div>
-        <p>YOUR SKILL. [cite_start]SUCCESS & JOURNEY</p> [cite: 2]
-    </header>
+    </div>
+    <div id="message-modal" class="modal hidden">
+        <div class="modal-content space-y-4">
+            <h3 id="modal-title" class="text-2xl font-bold text-gray-800"></h3>
+            <p id="modal-message" class="text-gray-700"></p>
+            <button id="modal-close-button" class="mt-4 bg-indigo-600 text-white p-3 rounded-md font-semibold hover:bg-indigo-700 transition duration-300 shadow-md">
+                Close
+            </button>
+        </div>
+    </div>
 
-    <main>
-        <section id="auth-section">
-            <div class="auth-form" id="login-form">
-                <h2>Student Login</h2>
-                <input type="email" id="login-email" placeholder="Email">
-                <input type="password" id="login-password" placeholder="Password">
-                <button id="login-btn">Login</button>
-                <p>Don't have an account? <a href="#" id="show-signup">Sign Up</a></p>
-            </div>
-
-            <div class="auth-form hidden" id="signup-form">
-                <h2>Student Sign Up</h2>
-                <input type="text" id="signup-name" placeholder="Full Name">
-                <input type="email" id="signup-email" placeholder="Email">
-                <input type="password" id="signup-password" placeholder="Password">
-                <input type="password" id="signup-confirm-password" placeholder="Confirm Password">
-                <button id="signup-btn">Sign Up</button>
-                <p>Already have an account? <a href="#" id="show-login">Login</a></p>
-            </div>
-
-            <div class="auth-form hidden" id="college-signup-form">
-                <h2>College Sign Up</h2>
-                <input type="text" id="college-signup-name" placeholder="College Name">
-                <input type="email" id="college-signup-email" placeholder="College Email">
-                <input type="password" id="college-signup-password" placeholder="Password">
-                <button id="college-signup-btn">Register College</button>
-                <p>Go back to <a href="#" id="hide-college-signup">Student Login</a></p>
-            </div>
-
-            <button id="show-college-signup">Are you a College? Register Here</button>
-        </section>
-
-        <section id="dashboard-section" class="hidden">
-            <h2>Welcome!</h2>
-            <p>Select your preferences to find colleges.</p>
-            <div id="location-selection">
-                [cite_start]<button id="india-btn">INDIA</button> [cite: 33]
-                [cite_start]<button id="abroad-btn">ABROAD</button> [cite: 33]
-            </div>
-            <div id="college-list-container" class="hidden">
-                <h3>Colleges available based on your selection:</h3>
-                <ul id="college-list">
-                    </ul>
-            </div>
-            <button id="logout-btn">Logout</button>
-        </section>
-    </main>
 
     <script>
-        // Your Firebase Configuration (Replace with your actual config)
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // UI Elements
-        const loginForm = document.getElementById('login-form');
-        const signupForm = document.getElementById('signup-form');
-        const collegeSignupForm = document.getElementById('college-signup-form');
-        const dashboardSection = document.getElementById('dashboard-section');
-        const authSection = document.getElementById('auth-section');
-
-        const loginEmailInput = document.getElementById('login-email');
-        const loginPasswordInput = document.getElementById('login-password');
-        const loginBtn = document.getElementById('login-btn');
-
-        const signupNameInput = document.getElementById('signup-name');
-        const signupEmailInput = document.getElementById('signup-email');
-        const signupPasswordInput = document.getElementById('signup-password');
-        const signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
-        const signupBtn = document.getElementById('signup-btn');
-
-        const collegeSignupNameInput = document.getElementById('college-signup-name');
-        const collegeSignupEmailInput = document.getElementById('college-signup-email');
-        const collegeSignupPasswordInput = document.getElementById('college-signup-password');
-        const collegeSignupBtn = document.getElementById('college-signup-btn');
-
-        const showSignupLink = document.getElementById('show-signup');
-        const showLoginLink = document.getElementById('show-login');
-        const showCollegeSignupBtn = document.getElementById('show-college-signup');
-        const hideCollegeSignupLink = document.getElementById('hide-college-signup');
-
-        [cite_start]const indiaBtn = document.getElementById('india-btn'); [cite: 33]
-        [cite_start]const abroadBtn = document.getElementById('abroad-btn'); [cite: 33]
-        const collegeListContainer = document.getElementById('college-list-container');
-        const collegeListUl = document.getElementById('college-list');
-        const logoutBtn = document.getElementById('logout-btn');
-
-        // --- UI Toggle Functions ---
-        function showLoginForm() {
-            loginForm.classList.remove('hidden');
-            signupForm.classList.add('hidden');
-            collegeSignupForm.classList.add('hidden');
-            showCollegeSignupBtn.classList.remove('hidden');
-        }
-
-        function showSignupForm() {
-            loginForm.classList.add('hidden');
-            signupForm.classList.remove('hidden');
-            collegeSignupForm.classList.add('hidden');
-            showCollegeSignupBtn.classList.add('hidden'); // Hide college signup when student signup is active
-        }
-
-        function showCollegeSignup() {
-            loginForm.classList.add('hidden');
-            signupForm.classList.add('hidden');
-            collegeSignupForm.classList.remove('hidden');
-            showCollegeSignupBtn.classList.add('hidden');
-        }
-
-        function showDashboard() {
-            authSection.classList.add('hidden');
-            dashboardSection.classList.remove('hidden');
-        }
-
-        function showAuthSection() {
-            authSection.classList.remove('hidden');
-            dashboardSection.classList.add('hidden');
-            showLoginForm(); // Default to login when showing auth section
-        }
-
-        // --- Event Listeners for UI Toggles ---
-        showSignupLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            showSignupForm();
-        });
-
-        showLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            showLoginForm();
-        });
-
-        showCollegeSignupBtn.addEventListener('click', () => {
-            showCollegeSignup();
-        });
-
-        hideCollegeSignupLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            showLoginForm();
-        });
-
-        // --- Authentication Functions ---
-
-        // Student Login
-        loginBtn.addEventListener('click', async () => {
-            const email = loginEmailInput.value;
-            const password = loginPasswordInput.value;
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                console.log('User logged in successfully!');
-                showDashboard();
-            } catch (error) {
-                console.error('Login error:', error.message);
-                alert('Login failed: ' + error.message);
+        const contentArea = document.getElementById('content-area');
+        const messageModal = document.getElementById('message-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const modalCloseButton = document.getElementById('modal-close-button');
+        const colleges = [
+            {
+                id: 'c1',
+                name: "Indian Institute of Technology Bombay",
+                location: "Mumbai, India",
+                fees: "₹2,00,000/year",
+                eligibility: "JEE Advanced",
+                placementRate: "90%",
+                scholarships: "Merit-based",
+                ranking: 1,
+                housing: "On-campus hostels available",
+                support: "Counseling services, academic support",
+                rules: "Strict attendance, no ragging policy"
+            },
+            {
+                id: 'c2',
+                name: "Massachusetts Institute of Technology",
+                location: "Cambridge, USA",
+                fees: "$60,000/year",
+                eligibility: "SAT/ACT, Essays, Recommendations",
+                placementRate: "95%",
+                scholarships: "Need-based, competitive",
+                ranking: 1,
+                housing: "Guaranteed on-campus housing for freshmen",
+                support: "Career services, health services",
+                rules: "Academic honesty, campus code of conduct"
+            },
+            {
+                id: 'c3',
+                name: "University of Delhi",
+                location: "Delhi, India",
+                fees: "₹50,000/year",
+                eligibility: "CUET",
+                placementRate: "70%",
+                scholarships: "Various state/national schemes",
+                ranking: 20,
+                housing: "Limited hostel facilities, PGs available nearby",
+                support: "Student associations, library access",
+                rules: "University academic regulations"
+            },
+            {
+                id: 'c4',
+                name: "Stanford University",
+                location: "Stanford, USA",
+                fees: "$65,000/year",
+                eligibility: "SAT/ACT, Strong academic record",
+                placementRate: "92%",
+                scholarships: "Extensive financial aid",
+                ranking: 2,
+                housing: "Variety of housing options",
+                support: "Research opportunities, entrepreneurial ecosystem",
+                rules: "Honor code, residential policies"
+            },
+            {
+                id: 'c5',
+                name: "Indian Institute of Management Bangalore",
+                location: "Bangalore, India",
+                fees: "₹23,00,000/course",
+                eligibility: "CAT, Work experience (for some programs)",
+                placementRate: "98%",
+                scholarships: "Industry-sponsored, need-based",
+                ranking: 2,
+                housing: "Well-equipped hostel blocks",
+                support: "Alumni network, mentoring programs",
+                rules: "Professional conduct, academic integrity"
             }
+        ];
+
+        const aptitudeQuestions = [
+            {
+                id: 'q1',
+                type: 'verbal',
+                question: "Choose the word that is most nearly opposite in meaning to 'Punctilious'.",
+                options: ['Careful', 'Sloppy', 'Precise', 'Diligent'],
+                correctAnswer: 'Sloppy'
+            },
+            {
+                id: 'q2',
+                type: 'quantitative',
+                question: "If a = 5, b = 3, then what is a² + b²?",
+                options: ['8', '16', '34', '64'],
+                correctAnswer: '34'
+            },
+            {
+                id: 'q3',
+                type: 'general-knowledge',
+                question: "Which planet is known as the 'Red Planet'?",
+                options: ['Earth', 'Mars', 'Jupiter', 'Venus'],
+                correctAnswer: 'Mars'
+            },
+            {
+                id: 'q4',
+                type: 'verbal',
+                question: "Complete the analogy: 'Hand is to Glove as Foot is to ____.'",
+                options: ['Sock', 'Shoe', 'Boot', 'Toe'],
+                correctAnswer: 'Shoe'
+            },
+            {
+                id: 'q5',
+                type: 'quantitative',
+                question: "A car travels at 60 km/h. How far does it travel in 30 minutes?",
+                options: ['20 km', '30 km', '40 km', '60 km'],
+                correctAnswer: '30 km'
+            },
+        ];
+
+        let selectedAnswers = {};
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let testCompleted = false;
+
+        function showMessage(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            messageModal.classList.remove('hidden');
+        }
+
+     
+        modalCloseButton.addEventListener('click', () => {
+            messageModal.classList.add('hidden');
         });
 
-        // Student Sign Up
-        signupBtn.addEventListener('click', async () => {
-            const name = signupNameInput.value;
-            const email = signupEmailInput.value;
-            const password = signupPasswordInput.value;
-            const confirmPassword = signupConfirmPasswordInput.value;
+    
+        function renderPage(pageName) {
+            contentArea.innerHTML = '';
+            switch (pageName) {
+                case 'login':
+                    renderLoginPage();
+                    break;
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'collegeList':
+                    renderCollegeListPage();
+                    break;
+                case 'collegeDetails':
+                    break;
+                case 'aptitudeTest':
+                    renderAptitudeTestPage();
+                    break;
+                case 'testResults':
+                    renderTestResultsPage();
+                    break;
+                default:
+                    renderLoginPage(); 
+            }
+        }
+        function renderLoginPage() {
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Student Login (Simulated)</h2>
+                    <form id="login-form" class="space-y-5">
+                        <div>
+                            <label for="email" class="block text-gray-700 text-sm font-medium mb-1">Email</label>
+                            <input type="email" id="email" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="your.email@example.com" required>
+                        </div>
+                        <div>
+                            <label for="password" class="block text-gray-700 text-sm font-medium mb-1">Password</label>
+                            <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+                            Login (Any input works)
+                        </button>
+                    </form>
+                    <p class="text-center text-gray-600">
+                        Don't have an account?
+                        <button id="signup-btn" class="text-indigo-600 hover:underline font-medium">
+                            Sign Up
+                        </button>
+                    </p>
+                </div>
+            `;
+            document.getElementById('login-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                showMessage('Login Successful!', 'Welcome to the Career Guidance App.');
+                renderPage('dashboard');
+            });
+            document.getElementById('signup-btn').addEventListener('click', () => renderSignUpPage());
+        }
 
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
+        function renderSignUpPage() {
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Student Sign Up (Simulated)</h2>
+                    <form id="signup-form" class="space-y-5">
+                        <div>
+                            <label for="new-email" class="block text-gray-700 text-sm font-medium mb-1">Email</label>
+                            <input type="email" id="new-email" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="your.email@example.com" required>
+                        </div>
+                        <div>
+                            <label for="new-password" class="block text-gray-700 text-sm font-medium mb-1">Password</label>
+                            <input type="password" id="new-password" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="•••••••• (min 6 characters)" required minlength="6">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+                            Sign Up (Any input works)
+                        </button>
+                    </form>
+                    <p class="text-center text-gray-600">
+                        Already have an account?
+                        <button id="login-btn" class="text-indigo-600 hover:underline font-medium">
+                            Login
+                        </button>
+                    </p>
+                </div>
+            `;
+            document.getElementById('signup-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                showMessage('Sign Up Successful!', 'You can now log in.');
+                renderPage('login');
+            });
+            document.getElementById('login-btn').addEventListener('click', () => renderLoginPage());
+        }
+
+        function renderDashboard() {
+            contentArea.innerHTML = `
+                <div class="space-y-8">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Welcome to Your Dashboard!</h2>
+                    <p class="text-center text-gray-600">
+                        Explore institutions and take an aptitude test to guide your career.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <button id="view-colleges-btn" class="bg-indigo-500 text-white p-4 rounded-lg shadow-md hover:bg-indigo-600 transition duration-300 flex items-center justify-center space-x-2 font-semibold text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13.622c0 .248.163.468.404.538l3.05.86c.245.07.498-.01.684-.196L21 15.621V7.75c0-.248-.163-.468-.404-.538l-3.05-.86a.999.999 0 00-.684.196L12 6.253zM12 6.253V21.1c0 .248-.163.468-.404.538l-3.05.86a.999.999 0 01-.684-.196L3 15.621V7.75c0-.248.163-.468.404-.538l3.05-.86a.999.999 0 00.684.196L12 6.253z" />
+                            </svg>
+                            <span>View College List</span>
+                        </button>
+                        <button id="take-aptitude-test-btn" class="bg-green-500 text-white p-4 rounded-lg shadow-md hover:bg-green-600 transition duration-300 flex items-center justify-center space-x-2 font-semibold text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                            <span>Take Aptitude Test</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-8">
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Recommended Colleges (Sample)</h3>
+                        <div class="space-y-4">
+                            ${colleges.slice(0, 3).map(college => `
+                                <div class="bg-blue-50 p-4 rounded-lg shadow-sm border border-blue-100">
+                                    <h4 class="text-xl font-bold text-indigo-700">${college.name}</h4>
+                                    <p class="text-gray-700">Location: ${college.location}</p>
+                                    <p class="text-gray-700">Fees: ${college.fees}</p>
+                                    <p class="text-gray-700">Ranking: ${college.ranking}</p>
+                                </div>
+                            `).join('')}
+                            <button id="view-all-colleges-dashboard-btn" class="mt-4 w-full bg-blue-500 text-white p-3 rounded-md font-semibold hover:bg-blue-600 transition duration-300 shadow-md">
+                                View All Colleges
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center mt-8">
+                        <button id="logout-btn" class="bg-red-500 text-white p-3 rounded-md font-semibold text-lg hover:bg-red-600 transition duration-300 shadow-md">
+                            Logout (Go to Login Page)
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('view-colleges-btn').addEventListener('click', () => renderPage('collegeList'));
+            document.getElementById('take-aptitude-test-btn').addEventListener('click', () => {
+                currentQuestionIndex = 0;
+                selectedAnswers = {};
+                score = 0;
+                testCompleted = false;
+                renderPage('aptitudeTest');
+            });
+            document.getElementById('view-all-colleges-dashboard-btn').addEventListener('click', () => renderPage('collegeList'));
+            document.getElementById('logout-btn').addEventListener('click', () => renderPage('login'));
+        }
+
+        function renderCollegeListPage(filters = {}) {
+            let filteredColleges = [...colleges]; 
+            if (filters.location) {
+                if (filters.location === 'India') {
+                    filteredColleges = filteredColleges.filter(c => c.location.toLowerCase().includes('india'));
+                } else if (filters.location === 'Abroad') {
+                    filteredColleges = filteredColleges.filter(c => !c.location.toLowerCase().includes('india'));
+                }
+            }
+            if (filters.minRanking) {
+                filteredColleges = filteredColleges.filter(c => c.ranking >= parseInt(filters.minRanking));
+            }
+            if (filters.maxFees) {
+                filteredColleges = filteredColleges.filter(c => {
+                    const collegeFeeNum = parseFloat(c.fees.replace(/[^\d.]/g, ''));
+                    return collegeFeeNum <= parseFloat(filters.maxFees);
+                });
+            }
+            filteredColleges.sort((a, b) => a.ranking - b.ranking);
+
+            contentArea.innerHTML = `
+                <div class="space-y-8">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">College List</h2>
+                    <button id="back-to-dashboard-btn" class="bg-gray-200 text-gray-700 p-2 rounded-md font-semibold hover:bg-gray-300 transition duration-300 text-sm flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Back to Dashboard</span>
+                    </button>
+
+                    <!-- Filter Section -->
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-inner space-y-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Filter Colleges</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="min-ranking" class="block text-gray-700 text-sm font-medium mb-1">Minimum Ranking</label>
+                                <input type="number" id="min-ranking" value="${filters.minRanking || ''}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 10">
+                            </div>
+                            <div>
+                                <label for="max-fees" class="block text-gray-700 text-sm font-medium mb-1">Maximum Fees (numeric only)</label>
+                                <input type="number" id="max-fees" value="${filters.maxFees || ''}" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 50000">
+                            </div>
+                        </div>
+                        <div class="flex justify-center mt-4 space-x-4">
+                            <button id="location-india-btn" class="bg-indigo-500 text-white p-3 rounded-md font-semibold hover:bg-indigo-600 transition duration-300 shadow-md">
+                                Filter by India
+                            </button>
+                            <button id="location-abroad-btn" class="bg-indigo-500 text-white p-3 rounded-md font-semibold hover:bg-indigo-600 transition duration-300 shadow-md">
+                                Filter by Abroad
+                            </button>
+                            <button id="clear-filters-btn" class="bg-gray-300 text-gray-800 p-3 rounded-md font-semibold hover:bg-gray-400 transition duration-300 shadow-md">
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- College List Display -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        ${filteredColleges.length > 0 ? filteredColleges.map(college => `
+                            <div class="bg-white border border-gray-200 rounded-lg shadow-lg p-6 space-y-3 hover:shadow-xl transition duration-300">
+                                <h4 class="text-2xl font-bold text-indigo-800">${college.name}</h4>
+                                <p class="text-gray-700"><span class="font-semibold">Location:</span> ${college.location}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Fees:</span> ${college.fees}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Eligibility:</span> ${college.eligibility}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Placement Rate:</span> ${college.placementRate}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Scholarships:</span> ${college.scholarships}</p>
+                                <p class="text-gray-700"><span class="font-semibold">Ranking:</span> ${college.ranking}</p>
+                                <button data-college-id="${college.id}" class="select-college-btn mt-4 w-full bg-green-500 text-white p-3 rounded-md font-semibold hover:bg-green-600 transition duration-300 shadow-md">
+                                    View Details & Register
+                                </button>
+                            </div>
+                        `).join('') : `
+                            <p class="col-span-full text-center text-gray-500">No colleges match your criteria. Try adjusting your filters.</p>
+                        `}
+                    </div>
+                </div>
+            `;
+            document.getElementById('back-to-dashboard-btn').addEventListener('click', () => renderPage('dashboard'));
+
+            document.getElementById('min-ranking').addEventListener('input', (e) => {
+                renderCollegeListPage({
+                    location: filters.location,
+                    minRanking: e.target.value,
+                    maxFees: document.getElementById('max-fees').value
+                });
+            });
+            document.getElementById('max-fees').addEventListener('input', (e) => {
+                renderCollegeListPage({
+                    location: filters.location,
+                    minRanking: document.getElementById('min-ranking').value,
+                    maxFees: e.target.value
+                });
+            });
+            document.getElementById('location-india-btn').addEventListener('click', () => {
+                renderCollegeListPage({
+                    location: 'India',
+                    minRanking: document.getElementById('min-ranking').value,
+                    maxFees: document.getElementById('max-fees').value
+                });
+            });
+            document.getElementById('location-abroad-btn').addEventListener('click', () => {
+                renderCollegeListPage({
+                    location: 'Abroad',
+                    minRanking: document.getElementById('min-ranking').value,
+                    maxFees: document.getElementById('max-fees').value
+                });
+            });
+            document.getElementById('clear-filters-btn').addEventListener('click', () => {
+                renderCollegeListPage({}); 
+            });
+
+        
+            document.querySelectorAll('.select-college-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const collegeId = e.target.dataset.collegeId;
+                    renderCollegeDetailsPage(collegeId);
+                });
+            });
+        }
+
+        function renderCollegeDetailsPage(collegeId) {
+            const college = colleges.find(c => c.id === collegeId);
+            if (!college) {
+                showMessage('Error', 'College not found.');
+                renderPage('collegeList');
                 return;
             }
 
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                // Add user details to Firestore
-                await db.collection('students').doc(userCredential.user.uid).set({
-                    name: name,
-                    email: email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log('User signed up and details saved!');
-                alert('Registration successful! Please login.');
-                showLoginForm();
-            } catch (error) {
-                console.error('Signup error:', error.message);
-                alert('Signup failed: ' + error.message);
-            }
-        });
+            contentArea.innerHTML = `
+                <div class="space-y-8">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">${college.name}</h2>
+                    <button id="back-to-colleges-btn" class="bg-gray-200 text-gray-700 p-2 rounded-md font-semibold hover:bg-gray-300 transition duration-300 text-sm flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Back to College List</span>
+                    </button>
 
-        // College Sign Up - This would typically be an admin function in a real app, but for demonstration, showing a direct signup.
-        collegeSignupBtn.addEventListener('click', async () => {
-            const collegeName = collegeSignupNameInput.value;
-            const collegeEmail = collegeSignupEmailInput.value;
-            const collegePassword = collegeSignupPasswordInput.value;
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-inner space-y-4">
+                        <p class="text-gray-800"><span class="font-semibold">Location:</span> ${college.location}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Fees:</span> ${college.fees}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Eligibility:</span> ${college.eligibility}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Placement Rate:</span> ${college.placementRate}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Scholarships:</span> ${college.scholarships}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Ranking:</span> ${college.ranking}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Housing Facilities:</span> ${college.housing}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Campus Support Services:</span> ${college.support}</p>
+                        <p class="text-gray-800"><span class="font-semibold">Rules & Regulations:</span> ${college.rules}</p>
+                    </div>
 
-            try {
-                // Create a Firebase user for the college (could be a specific admin account)
-                const userCredential = await auth.createUserWithEmailAndPassword(collegeEmail, collegePassword);
-                // Save college details to Firestore
-                await db.collection('colleges').doc(userCredential.user.uid).set({
-                    name: collegeName,
-                    email: collegeEmail,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log('College registered successfully!');
-                alert('College registration successful! Admin can now manage this college.');
-                showLoginForm();
-            } catch (error) {
-                console.error('College signup error:', error.message);
-                alert('College registration failed: ' + error.message);
-            }
-        });
-
-        // Logout
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await auth.signOut();
-                console.log('User logged out.');
-                showAuthSection();
-                collegeListUl.innerHTML = ''; // Clear college list on logout
-                collegeListContainer.classList.add('hidden');
-            } catch (error) {
-                console.error('Logout error:', error.message);
-            }
-        });
-
-        // --- Location Selection and College List Display ---
-
-        async function fetchAndDisplayColleges(location) {
-            collegeListUl.innerHTML = 'Loading colleges...';
-            collegeListContainer.classList.remove('hidden');
-            try {
-                // For demonstration, let's add some dummy colleges.
-                // In a real app, you'd filter by location from your 'colleges' collection.
-                let colleges = [];
-                if (location === 'india') {
-                    colleges = [
-                        { name: 'IIT Delhi', details: 'Top engineering institute.' },
-                        { name: 'IIM Bangalore', details: 'Leading management school.' }
-                    ];
-                } else if (location === 'abroad') {
-                    colleges = [
-                        { name: 'MIT', details: 'Massachusetts Institute of Technology.' },
-                        { name: 'Stanford University', details: 'Renowned for technology and innovation.' }
-                    ];
-                }
-
-                if (colleges.length > 0) {
-                    collegeListUl.innerHTML = ''; // Clear loading message
-                    colleges.forEach(college => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<strong>${college.name}</strong>: ${college.details}`;
-                        collegeListUl.appendChild(li);
-                    });
-                } else {
-                    collegeListUl.innerHTML = 'No colleges found for this selection.';
-                }
-
-            } catch (error) {
-                console.error('Error fetching colleges:', error);
-                collegeListUl.innerHTML = 'Error loading colleges.';
-            }
+                    <div class="flex justify-center mt-6">
+                        <button id="register-college-btn" class="bg-purple-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-purple-700 transition duration-300 shadow-md">
+                            Simulate Registration for ${college.name}
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('back-to-colleges-btn').addEventListener('click', () => renderPage('collegeList'));
+            document.getElementById('register-college-btn').addEventListener('click', () => {
+                showMessage('Registration Simulated', `You have expressed interest in ${college.name}. In a real app, this would initiate a detailed registration process.`);
+            });
         }
 
-        [cite_start]indiaBtn.addEventListener('click', () => { [cite: 33]
-            fetchAndDisplayColleges('india');
-        });
 
-        [cite_start]abroadBtn.addEventListener('click', () => { [cite: 33]
-            fetchAndDisplayColleges('abroad');
-        });
-
-
-        // --- Firebase Auth State Listener ---
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                console.log('User is logged in:', user.email);
-                showDashboard();
-            } else {
-                console.log('No user logged in.');
-                showAuthSection();
+        function renderAptitudeTestPage() {
+            if (testCompleted) {
+                renderTestResultsPage(); 
+                return;
             }
+
+            const currentQuestion = aptitudeQuestions[currentQuestionIndex];
+
+            if (!currentQuestion) {
+         
+                showMessage('Error', 'No more questions or test data issue.');
+                renderPage('dashboard');
+                return;
+            }
+
+            contentArea.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-3xl font-bold text-center text-gray-800">Aptitude Test</h2>
+                    <button id="back-to-dashboard-test-btn" class="bg-gray-200 text-gray-700 p-2 rounded-md font-semibold hover:bg-gray-300 transition duration-300 text-sm flex items-center space-x-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span>Back to Dashboard</span>
+                    </button>
+
+                    <div class="bg-blue-50 p-6 rounded-lg shadow-lg space-y-4">
+                        <p class="text-lg font-semibold text-gray-900">
+                            Question ${currentQuestionIndex + 1} of ${aptitudeQuestions.length}:
+                        </p>
+                        <p class="text-xl text-gray-800 font-medium">${currentQuestion.question}</p>
+                        <div class="space-y-3" id="options-container">
+                            <!-- Options will be dynamically added here -->
+                        </div>
+                        <div class="flex justify-end mt-6">
+                            <button id="next-question-btn" class="bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md disabled:opacity-50" disabled>
+                                ${currentQuestionIndex === aptitudeQuestions.length - 1 ? 'Finish Test' : 'Next Question'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('back-to-dashboard-test-btn').addEventListener('click', () => renderPage('dashboard'));
+
+            const optionsContainer = document.getElementById('options-container');
+            const nextQuestionBtn = document.getElementById('next-question-btn');
+
+           
+            currentQuestion.options.forEach((option, index) => {
+                const label = document.createElement('label');
+                label.className = `flex items-center p-3 border rounded-md cursor-pointer transition duration-200 ${selectedAnswers[currentQuestion.id] === option ? 'bg-indigo-100 border-indigo-500' : 'bg-white border-gray-300 hover:bg-gray-50'}`;
+                label.innerHTML = `
+                    <input type="radio" name="${currentQuestion.id}" value="${option}" class="form-radio h-5 w-5 text-indigo-600" ${selectedAnswers[currentQuestion.id] === option ? 'checked' : ''}>
+                    <span class="ml-3 text-gray-800">${option}</span>
+                `;
+                label.querySelector('input').addEventListener('change', (e) => {
+                    selectedAnswers[currentQuestion.id] = e.target.value;
+                    nextQuestionBtn.disabled = false; // Enable button once an option is selected
+                 
+                    updateOptionStyles(optionsContainer, currentQuestion.id, e.target.value);
+                });
+                optionsContainer.appendChild(label);
+            });
+
+            // Initial button state based on whether an answer is already selected for this question
+            if (selectedAnswers[currentQuestion.id]) {
+                nextQuestionBtn.disabled = false;
+            }
+
+            nextQuestionBtn.addEventListener('click', () => {
+                if (!selectedAnswers[currentQuestion.id]) {
+                    showMessage('Warning', 'Please select an answer before proceeding.');
+                    return;
+                }
+
+                if (currentQuestionIndex < aptitudeQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    renderAptitudeTestPage(); 
+                } else {
+                    calculateScoreAndFinishTest();
+                    renderPage('testResults');
+                }
+            });
+        }
+
+        function updateOptionStyles(container, questionId, selectedValue) {
+            container.querySelectorAll(`input[name="${questionId}"]`).forEach(input => {
+                const label = input.closest('label');
+                if (input.value === selectedValue) {
+                    label.classList.add('bg-indigo-100', 'border-indigo-500');
+                    label.classList.remove('bg-white', 'border-gray-300', 'hover:bg-gray-50');
+                } else {
+                    label.classList.remove('bg-indigo-100', 'border-indigo-500');
+                    label.classList.add('bg-white', 'border-gray-300', 'hover:bg-gray-50');
+                }
+            });
+        }
+
+        function calculateScoreAndFinishTest() {
+            score = 0;
+            aptitudeQuestions.forEach(q => {
+                if (selectedAnswers[q.id] === q.correctAnswer) {
+                    score++;
+                }
+            });
+            testCompleted = true;
+        }
+
+        function renderTestResultsPage() {
+            contentArea.innerHTML = `
+                <div class="space-y-6 text-center">
+                    <h2 class="text-3xl font-bold text-green-700">Test Completed!</h2>
+                    <p class="text-xl text-gray-800">Your Score: <span class="font-extrabold text-indigo-600">${score}</span> out of <span class="font-extrabold text-indigo-600">${aptitudeQuestions.length}</span></p>
+                    <div class="bg-green-50 p-6 rounded-lg shadow-inner">
+                        <h3 class="text-2xl font-semibold text-gray-700 mb-4">Review Your Answers</h3>
+                        <div class="space-y-4 max-h-96 overflow-y-auto border border-gray-200 p-2 rounded-md">
+                            ${aptitudeQuestions.map((q, index) => `
+                                <div class="p-3 border border-gray-200 rounded-md bg-white text-left">
+                                    <p class="font-semibold text-gray-900 mb-1">Q${index + 1}: ${q.question}</p>
+                                    <p class="text-sm text-gray-700">Your Answer: <span class="${selectedAnswers[q.id] === q.correctAnswer ? 'text-green-600' : 'text-red-600'} font-medium">${selectedAnswers[q.id] || 'Not answered'}</span></p>
+                                    <p class="text-sm text-gray-700">Correct Answer: <span class="font-medium text-green-600">${q.correctAnswer}</span></p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button id="back-to-dashboard-from-results-btn" class="bg-indigo-600 text-white p-3 rounded-md font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+                        Back to Dashboard
+                    </button>
+                </div>
+            `;
+            document.getElementById('back-to-dashboard-from-results-btn').addEventListener('click', () => renderPage('dashboard'));
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPage('login'); 
         });
-
-        // The document specifies modules like:
-        [cite_start]// - Student Login Page [cite: 15]
-        [cite_start]// - Sign Up Page [cite: 16]
-        [cite_start]// - College Sign Up Page [cite: 17]
-        [cite_start]// - Career Selection Page [cite: 18]
-        [cite_start]// - Location Selection Page [cite: 19]
-        [cite_start]// - College List Pages [cite: 20]
-        [cite_start]// - College Selection Page [cite: 21]
-        [cite_start]// - College Registration Page [cite: 22]
-        [cite_start]// - Student Details Pages [cite: 22]
-        [cite_start]// - Aptitude Test Page [cite: 23]
-        [cite_start]// - Test Completion Page [cite: 23]
-
-        // This code provides a starting point for Student Login, Sign Up, College Sign Up,
-        [cite_start]// Location Selection [cite: 19][cite_start], and a basic College List display[cite: 20].
-        // Significant additional code would be required to implement all other modules
-        // and features described in the document, such as:
-        [cite_start]// - Comprehensive college details and eligibility criteria evaluation [cite: 5, 6, 7, 31]
-        [cite_start]// - Aptitude test with verbal, quantitative, and general knowledge MCQs [cite: 10, 11, 32]
-        [cite_start]// - Student data management [cite: 28]
-        [cite_start]// - Admin functionalities for adding/removing colleges [cite: 25, 26]
-        [cite_start]// - Detailed college registration processes [cite: 9, 34]
-        [cite_start]// - Test score generation [cite: 35]
-        [cite_start]// - Robust logging [cite: 50, 51] and error handling.
     </script>
 </body>
 </html>
